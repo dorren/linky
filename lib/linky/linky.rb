@@ -18,7 +18,7 @@ class Linky
     def link(keyword, target, html, options={})
       options = options.map {|k,v| %{#{k}="#{v}"}}.join " " 
       block = proc {|keyword| %{<a href="#{target}" #{options}>#{keyword}</a>}}
-      html_fragment = html.kind_of?(Nokogiri::HTML::DocumentFragment) ? html : Nokogiri::HTML::DocumentFragment.parse(html)
+      html_fragment = html.kind_of?(Nokogiri::HTML::DocumentFragment) ? html : Nokogiri::HTML::DocumentFragment.parse(html, 'UTF-8')
       html_fragment_orig = html_fragment.dup
 
       real_link keyword.to_s, html_fragment, &block
@@ -41,9 +41,9 @@ class Linky
         prefix, keyword, postfix = break_on_boundary match[1], haystack.text 
 
         haystack.content = prefix
-        haystack.add_next_sibling Nokogiri::HTML::DocumentFragment.parse(new_needle)
+        haystack.add_next_sibling Nokogiri::HTML::DocumentFragment.parse(new_needle, 'UTF-8')
         if !postfix.nil? and !postfix.empty?
-          if postfix_content = Nokogiri::HTML::DocumentFragment.parse(postfix)
+          if postfix_content = Nokogiri::HTML::DocumentFragment.parse(postfix, 'UTF-8')
             postfix_content.content = postfix
             haystack.next_sibling.add_next_sibling postfix_content 
           end

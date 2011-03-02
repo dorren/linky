@@ -1,3 +1,4 @@
+# encoding: utf-8       # for Ruby 1.9, so you can enter non ascii char
 $LOAD_PATH.unshift './lib'
 require 'linky'
 
@@ -51,8 +52,14 @@ describe Linky, "#link" do
 
   it "should process pre parsed html fragment object" do
     html = "apple &amp; orange"
-    frag = Nokogiri::HTML::DocumentFragment.parse(html)
+    frag = Nokogiri::HTML::DocumentFragment.parse(html, 'UTF-8')
     new_html = Linky.link "apple", "topics/apple", frag
     new_html.should == %(<a href="topics/apple">apple</a> &amp; orange)
+  end
+
+  it "should process extended ascii char" do
+    html = %(<a href="Rag&#249;">Rag&#249;</a>)
+    new_html = Linky.link "apple", "topics/apple", html
+    new_html.should == %(<a href="Ragù">Rag&#xF9;</a>)
   end
 end
