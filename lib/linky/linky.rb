@@ -4,7 +4,12 @@ class Linky
     #   * keyword: what you want linked
     #   * target: where you want it linked to
     #   * html: the html you want to look for the keyword in, or Nokogiri::HTML::DocumentFragment object.
-    #   * options: any extra attributes (besides href) that you want on the link.
+    #   * options:
+    #       :html -- any extra attributes (besides href) that you want on the link.
+    #       :output -- whether function should return generated html or not, 
+    #                  list of values below, default 'xhtml'.
+    #                  'xhtml' -- generate xhtml
+    #                  'none'  -- no output
     #
     # Here's an example:
     #
@@ -16,14 +21,21 @@ class Linky
     # if you provide parameter html as DocumentFragment object, after calling link(), that object is updated as well.
     # Means the output of link(keyword, target, html) == html.to_xhtml
     def link(keyword, target, html, options={})
-      options = options.map {|k,v| %{#{k}="#{v}"}}.join " " 
-      block = proc {|keyword| %{<a href="#{target}" #{options}>#{keyword}</a>}}
+      options = {:output => 'xhtml'}.merge(options)
+
+      html_options = (options[:html] || {}).map {|k,v| %{#{k}="#{v}"}}.join " " 
+      block = proc {|keyword| %{<a href="#{target}" #{html_options}>#{keyword}</a>}}
       html_fragment = html.kind_of?(Nokogiri::HTML::DocumentFragment) ? html : Nokogiri::HTML::DocumentFragment.parse(html, 'UTF-8')
       html_fragment_orig = html_fragment.dup
 
       real_link keyword.to_s, html_fragment, &block
       raise "We lost some content in attempting to link it. Please report a bug" unless html_fragment.text == html_fragment_orig.text 
-      html_fragment.to_xhtml
+      
+      if options[:output] == 'xhtml'
+        return html_fragment.to_xhtml
+      elsif options[:output] == 'none'
+        nil
+      end
     end
 
     private

@@ -16,7 +16,7 @@ describe Linky, "#link" do
   end
 
   it "should link any keywords not already linked" do
-    new_html = Linky.link(@keyword, "http://link.to.somewhere", @html, :class => "autolinked")
+    new_html = Linky.link(@keyword, "http://link.to.somewhere", @html, {:html => {:class => "autolinked"}})
     new_html.should == "<p>some html with <a href=\"http://link.to.somewhere\" class=\"autolinked\">keyword</a> and Keyword and <a href=\"#\">keyword</a></p>"
   end
 
@@ -62,4 +62,17 @@ describe Linky, "#link" do
     new_html = Linky.link "apple", "topics/apple", html
     new_html.should == %(<a href="Ragù">Rag&#xF9;</a>)
   end
+
+  it "should generate html" do
+    html = "apple & orange"
+    new_html = Linky.link "apple", "topics/apple", html, :output => 'xhtml'
+    new_html.should == %(<a href="topics/apple">apple</a> &amp; orange)
+  end
+
+  it "should not generate html" do
+    html = "apple & orange"
+    new_html = Linky.link "apple", "topics/apple", html, :output => 'none'
+    new_html.should be_nil
+  end
+
 end
